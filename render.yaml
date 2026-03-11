@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: finverify-ai
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: false
+      - key: FMP_API_KEY
+        sync: false
+      - key: ALPHA_VANTAGE_KEY
+        sync: false
