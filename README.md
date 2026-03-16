@@ -4,9 +4,9 @@
 
 77% of CFOs cite security and trust as critical risks in AI adoption. Financial AI systems operate as "black boxes," making decisions without explainability. **FinVerify AI** bridges this trust gap by providing source-verified validation of financial claims.
 
-## Why JPMorgan Chase
+## Why This Project
 
-This project directly aligns with JPMorgan's 2025 technology initiatives:
+This project directly aligns with 2025 technology initiatives:
 
 - **Fact Verification Patent** - JPMorgan filed a patent for blockchain + ML fact verification in 2024
 - **"Ask David" Multi-Agent System** - Their investment research tool acknowledges the "last mile accuracy" challenge
