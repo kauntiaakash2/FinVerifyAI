@@ -73,15 +73,28 @@ def parse_value_with_unit(value_str: str) -> tuple:
 
 
 # Configure logging
+import sys
+import os
+
 logger.remove()  # Remove default handler
+
+# Only write to stdout/stderr (works on Vercel and local)
 logger.add(
-    "logs/finverify.log",
-    rotation="500 MB",
-    retention="10 days",
-    level=settings.LOG_LEVEL,
-)
-logger.add(
-    lambda msg: print(msg, end=""),
+    sys.stdout,
     level=settings.LOG_LEVEL,
     format="{time} {level} {message}",
 )
+
+# Also try to write to file locally (will silently fail on Vercel's read-only fs)
+if settings.ENVIRONMENT == "development":
+    try:
+        os.makedirs("logs", exist_ok=True)
+        logger.add(
+            "logs/finverify.log",
+            rotation="500 MB",
+            retention="10 days",
+            level=settings.LOG_LEVEL,
+        )
+    except Exception:
+        # Silently fail if we can't create log files (e.g., Vercel)
+        pass
