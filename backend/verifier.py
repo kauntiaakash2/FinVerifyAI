@@ -71,21 +71,26 @@ class FinancialVerifier:
             "confidence": 0,
         }
 
+        # Normalize claim by removing possessive forms
+        claim_normalized = claim.lower().replace("'s", "").replace("'s", "")
+        
         # Extract company
         for name, ticker in fetcher.company_mapping.items():
-            if name in claim.lower():
+            if name in claim_normalized:
                 result["company"] = name.title()
                 result["ticker"] = ticker
                 break
 
         if not result["ticker"]:
-            # Try fuzzy matching
-            words = claim.lower().split()
+            # Try fuzzy matching on words
+            words = claim_normalized.split()
             for word in words:
-                ticker = fetcher.search_company(word)
+                # Clean the word (remove possessive forms and special chars)
+                cleaned_word = word.strip("'s").strip("'s").strip(".,!?")
+                ticker = fetcher.search_company(cleaned_word)
                 if ticker:
                     result["ticker"] = ticker
-                    result["company"] = word.title()
+                    result["company"] = cleaned_word.title()
                     break
 
         # Extract metric and value
@@ -144,7 +149,7 @@ class FinancialVerifier:
                 "claim": claim,
                 "confidence": 0,
                 "reason": "Could not identify company",
-                "error": "Company not recognized. Please specify a valid company name.",
+                "error": f"Company not recognized. Please check the spelling or try a different company name. Supported companies: Apple, Microsoft, Google, Amazon, Tesla, Nvidia, JPMorgan, etc.",
                 "verification": None,
             }
 
@@ -153,7 +158,7 @@ class FinancialVerifier:
                 "claim": claim,
                 "confidence": 0,
                 "reason": "Could not identify financial metric",
-                "error": "Metric not recognized. Please specify revenue, P/E ratio, etc.",
+                "error": f"Metric not recognized. Supported metrics: Revenue, P/E ratio, Stock price, Market cap, Profit margin, Dividend yield, Growth percentage. Example: 'Apple revenue is $394 billion'",
                 "verification": None,
             }
 
@@ -163,11 +168,13 @@ class FinancialVerifier:
         )
 
         if actual_value == 0:
+            # Try to provide helpful error message
+            metric_name = entities["metric"].replace("_", " ").title()
             return {
                 "claim": claim,
                 "confidence": 0,
                 "reason": "Could not fetch verification data",
-                "error": f'No data available for {entities["ticker"]} metric: {entities["metric"]}',
+                "error": f"No {metric_name} data available for {entities['ticker']}. This could mean: 1) The company ticker is not available on Yahoo Finance, 2) The metric is not available for this company, or 3) The company hasn't reported this data yet.",
                 "verification": None,
             }
 

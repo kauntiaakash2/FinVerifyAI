@@ -19,6 +19,7 @@ class DataFetcher:
     def __init__(self):
         self.sources = ["yfinance", "fmp", "alphavantage"]
         self.company_mapping = {
+            # Top Tech Companies
             "apple": "AAPL",
             "microsoft": "MSFT",
             "google": "GOOGL",
@@ -29,12 +30,185 @@ class DataFetcher:
             "facebook": "META",
             "netflix": "NFLX",
             "nvidia": "NVDA",
+            "intel": "INTC",
+            "amd": "AMD",
+            "qualcomm": "QCOM",
+            "broadcom": "AVGO",
+            "advanced micro devices": "AMD",
+            
+            # Financial Services
             "jpmorgan": "JPM",
             "jpmorgan chase": "JPM",
             "goldman sachs": "GS",
             "bank of america": "BAC",
+            "wells fargo": "WFC",
+            "morgan stanley": "MS",
+            "citigroup": "C",
+            "charles schwab": "SCHW",
+            "interactive brokers": "IBKR",
+            
+            # Berkshire
             "berkshire": "BRK-A",
             "berkshire hathaway": "BRK-A",
+            
+            # Media & Entertainment
+            "disney": "DIS",
+            "warner bros": "WBD",
+            "paramount": "PARR",
+            "comcast": "CMCSA",
+            "charter communications": "CHTR",
+            
+            # Healthcare & Pharma
+            "pfizer": "PFE",
+            "moderna": "MRNA",
+            "johnson johnson": "JNJ",
+            "eli lilly": "LLY",
+            "abbvie": "ABBV",
+            "merck": "MRK",
+            "bristol myers squibb": "BMY",
+            "astrazeneca": "AZN",
+            "novo nordisk": "NVO",
+            
+            # Consumer Goods
+            "coca cola": "KO",
+            "pepsico": "PEP",
+            "procter gamble": "PG",
+            "nestle": "NSRGY",
+            "unilever": "UL",
+            "reckitt": "RKYL",
+            
+            # Energy & Utilities
+            "exxon mobil": "XOM",
+            "chevron": "CVX",
+            "shell": "SHEL",
+            "bp": "BP",
+            "equinor": "EQNR",
+            "nextera energy": "NEE",
+            
+            # Airlines & Transportation
+            "united airlines": "UAL",
+            "american airlines": "AAL",
+            "delta airlines": "DAL",
+            "southwest airlines": "LUV",
+            "fedex": "FDX",
+            "ups": "UPS",
+            
+            # Retail
+            "walmart": "WMT",
+            "target": "TGT",
+            "costco": "COST",
+            "ebay": "EBAY",
+            "shopify": "SHOP",
+            
+            # Automotive
+            "general motors": "GM",
+            "ford": "F",
+            "toyota": "TM",
+            "volkswagen": "VWAGY",
+            "bmw": "BMWYY",
+            "stellantis": "STLA",
+            
+            # Fintech & Payment
+            "coinbase": "COIN",
+            "paypal": "PYPL",
+            "robinhood": "HOOD",
+            "affirm": "AFRM",
+            "klarna": "KLRNA",
+            "stripe": "S",
+            "square": "SQ",
+            "block": "BLOCK",
+            "neo": "NEO",
+            
+            # Real Estate & Construction
+            "prologis": "PLD",
+            "american tower": "AMT",
+            "crown castle": "CCI",
+            "simon property group": "SPG",
+            "brookfield": "BN",
+            
+            # Industrial
+            "caterpillar": "CAT",
+            "deere": "DE",
+            "honeywell": "HON",
+            "ge": "GE",
+            "general electric": "GE",
+            "lockheed martin": "LMT",
+            "boeing": "BA",
+            "raytheon": "RTX",
+            
+            # Semiconductor Equipment
+            "asml": "ASML",
+            "lam research": "LRCX",
+            "applied materials": "AMAT",
+            "kla": "KLAC",
+            
+            # Software & Cloud
+            "salesforce": "CRM",
+            "oracle": "ORCL",
+            "adobe": "ADBE",
+            "vmware": "VMW",
+            "servicenow": "NOW",
+            "workday": "WDAY",
+            "zoom": "ZM",
+            "datadog": "DDOG",
+            "elastic": "NSTG",
+            "mongodb": "MDB",
+            "gitlab": "GTLB",
+            "figma": "FIG",
+            "asana": "ASAN",
+            "okta": "OKTA",
+            "twilio": "TWLO",
+            "snowflake": "SNOW",
+            "cloudera": "CLDR",
+            
+            # Telecommunications
+            "att": "T",
+            "verizon": "VZ",
+            "t-mobile": "TMUS",
+            "vodafone": "VOD",
+            "deutsche telekom": "DTEGF",
+            
+            # Food & Beverage
+            "starbucks": "SBUX",
+            "mcdonalds": "MCD",
+            "yum china": "YUMC",
+            "restaurant brands": "QSR",
+            "chipotle": "CMG",
+            
+            # E-commerce & SaaS
+            "alibaba": "BABA",
+            "tencent": "TCEHY",
+            "naver": "NAVER",
+            "sea limited": "SE",
+            "meituan": "MTUAY",
+            "jd.com": "JD",
+            "baidu": "BIDU",
+            "pinduoduo": "PDD",
+            "bilibili": "BILI",
+            "netease": "NTES",
+            
+            # Cryptocurrency & Blockchain
+            "bitcoin": "BTC",
+            "ethereum": "ETH",
+            "binance": "BNB",
+            
+            # Travel & Hospitality
+            "marriott": "MAR",
+            "hyatt": "H",
+            "airbnb": "ABNB",
+            "booking holdings": "BKNG",
+            "expedia": "EXPE",
+            
+            # Insurance
+            "allstate": "ALL",
+            "progressive": "PGR",
+            "aig": "AIG",
+            "chubb": "CB",
+            
+            # Beverages & Alcohol
+            "diageo": "DEO",
+            "lvmh": "LVMUY",
+            "ab inbev": "BUD",
         }
 
     def search_company(self, query: str) -> Optional[str]:
@@ -109,25 +283,6 @@ class DataFetcher:
                 "website": "",
                 "source": "error",
             }
-                if response.status_code == 200:
-                    data = response.json()
-                    if data:
-                        profile = {
-                            "name": data[0].get("companyName", ""),
-                            "sector": data[0].get("sector", ""),
-                            "industry": data[0].get("industry", ""),
-                            "market_cap": data[0].get("mktCap", 0),
-                            "pe_ratio": data[0].get("pe", 0),
-                            "revenue": None,
-                            "website": data[0].get("website", ""),
-                            "source": "fmp",
-                        }
-                        cache[cache_key_str] = profile
-                        return profile
-            except Exception as e:
-                logger.warning(f"FMP failed for {ticker}: {e}")
-
-        return {"error": "No data available", "ticker": ticker}
 
     async def get_stock_price(self, ticker: str) -> float:
         """Get current stock price."""
@@ -187,6 +342,7 @@ class DataFetcher:
                 "dividend_yield": "dividendYield",
                 "profit_margin": "profitMargins",
                 "stock_price": "currentPrice",
+                "growth": "fiftyTwoWeekChangePercent",  # Year-over-year growth percentage
             }
 
             yf_metric = metric_map.get(metric)
@@ -199,6 +355,21 @@ class DataFetcher:
             if metric == "stock_price":
                 price = info.get("regularMarketPrice", 0)
                 return float(price) if price else 0
+
+            # Try alternative growth metrics
+            if metric == "growth":
+                # Try 52-week change first
+                growth = info.get("fiftyTwoWeekChangePercent")
+                if growth is not None:
+                    return float(growth)
+                # Try revenue growth as fallback
+                revenue_growth = info.get("revenueGrowth")
+                if revenue_growth is not None:
+                    return float(revenue_growth)
+                # Try earnings growth as fallback
+                earnings_growth = info.get("earningsGrowth")
+                if earnings_growth is not None:
+                    return float(earnings_growth)
 
             # Fallback to FMP if available
             if (
