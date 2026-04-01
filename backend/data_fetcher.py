@@ -71,33 +71,44 @@ class DataFetcher:
 
         # Try primary source (yfinance)
         try:
-            stock = yf.Ticker(ticker)
-            info = stock.info
+            try:
+                stock = yf.Ticker(ticker)
+                info = stock.info
+            except Exception as yf_error:
+                logger.warning(f"yfinance failed for {ticker}: {yf_error}")
+                info = {}
+            
             profile = {
-                "name": info.get("longName", ""),
+                "name": info.get("longName", ticker),
                 "sector": info.get("sector", ""),
                 "industry": info.get("industry", ""),
-                "market_cap": info.get("marketCap", 0),
-                "pe_ratio": info.get("trailingPE", 0),
-                "forward_pe": info.get("forwardPE", 0),
-                "revenue": info.get("totalRevenue", 0),
-                "revenue_growth": info.get("revenueGrowth", 0),
-                "profit_margins": info.get("profitMargins", 0),
+                "market_cap": float(info.get("marketCap", 0)) if info.get("marketCap") else 0,
+                "pe_ratio": float(info.get("trailingPE", 0)) if info.get("trailingPE") else 0,
+                "forward_pe": float(info.get("forwardPE", 0)) if info.get("forwardPE") else 0,
+                "revenue": float(info.get("totalRevenue", 0)) if info.get("totalRevenue") else 0,
+                "revenue_growth": float(info.get("revenueGrowth", 0)) if info.get("revenueGrowth") else 0,
+                "profit_margins": float(info.get("profitMargins", 0)) if info.get("profitMargins") else 0,
                 "website": info.get("website", ""),
                 "source": "yfinance",
             }
             cache[cache_key_str] = profile
             return profile
         except Exception as e:
-            logger.warning(f"yfinance failed for {ticker}: {e}")
-
-        # Fallback to FMP if API key available
-        if settings.FMP_API_KEY and settings.FMP_API_KEY != "your_fmp_api_key_here":
-            try:
-                url = f"https://financialmodelingprep.com/api/v3/profile/{ticker}"
-                response = requests.get(
-                    url, params={"apikey": settings.FMP_API_KEY}, timeout=10
-                )
+            logger.error(f"Error getting profile for {ticker}: {e}")
+            # Return a minimal profile instead of crashing
+            return {
+                "name": ticker,
+                "sector": "Unknown",
+                "industry": "Unknown",
+                "market_cap": 0,
+                "pe_ratio": 0,
+                "forward_pe": 0,
+                "revenue": 0,
+                "revenue_growth": 0,
+                "profit_margins": 0,
+                "website": "",
+                "source": "error",
+            }
                 if response.status_code == 200:
                     data = response.json()
                     if data:
@@ -161,8 +172,12 @@ class DataFetcher:
     async def get_financial_metric(self, ticker: str, metric: str) -> float:
         """Get specific financial metric."""
         try:
-            stock = yf.Ticker(ticker)
-            info = stock.info
+            try:
+                stock = yf.Ticker(ticker)
+                info = stock.info
+            except Exception as e:
+                logger.warning(f"Failed to fetch yfinance data for {ticker}: {e}")
+                return 0
 
             metric_map = {
                 "revenue": "totalRevenue",
@@ -176,11 +191,14 @@ class DataFetcher:
 
             yf_metric = metric_map.get(metric)
             if yf_metric and yf_metric in info:
-                return info[yf_metric]
+                value = info[yf_metric]
+                if value is not None:
+                    return float(value)
 
             # Try secondary key for stock_price
             if metric == "stock_price":
-                return info.get("regularMarketPrice", 0)
+                price = info.get("regularMarketPrice", 0)
+                return float(price) if price else 0
 
             # Fallback to FMP if available
             if (
@@ -188,22 +206,25 @@ class DataFetcher:
                 and settings.FMP_API_KEY != "your_fmp_api_key_here"
                 and metric in ["revenue", "pe"]
             ):
-                url = f"https://financialmodelingprep.com/api/v3/ratios/{ticker}"
-                response = requests.get(
-                    url, params={"apikey": settings.FMP_API_KEY}, timeout=10
-                )
-                if response.status_code == 200:
-                    data = response.json()
-                    if data and metric == "revenue":
-                        return data[0].get("revenuePerShare", 0) * info.get(
-                            "sharesOutstanding", 1
-                        )
-                    elif data and metric == "pe":
-                        return data[0].get("priceEarningsRatio", 0)
+                try:
+                    url = f"https://financialmodelingprep.com/api/v3/ratios/{ticker}"
+                    response = requests.get(
+                        url, params={"apikey": settings.FMP_API_KEY}, timeout=5
+                    )
+                    if response.status_code == 200:
+                        data = response.json()
+                        if data and metric == "revenue":
+                            return float(data[0].get("revenuePerShare", 0) * info.get(
+                                "sharesOutstanding", 1
+                            ))
+                        elif data and metric == "pe":
+                            return float(data[0].get("priceEarningsRatio", 0))
+                except Exception as fmp_error:
+                    logger.warning(f"FMP fallback failed: {fmp_error}")
 
             return 0
         except Exception as e:
-            logger.error(f"Error fetching metric {metric}: {e}")
+            logger.error(f"Error fetching metric {metric} for {ticker}: {e}")
             return 0
 
 
