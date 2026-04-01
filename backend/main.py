@@ -27,9 +27,12 @@ async def lifespan(app: FastAPI):
     """Lifespan events for startup/shutdown."""
     try:
         logger.info(f"Starting FinVerify AI in {settings.ENVIRONMENT} mode")
+        logger.info("App initialization successful")
     except Exception as e:
         print(f"Error logging startup: {e}")
+    
     yield
+    
     try:
         logger.info("Shutting down FinVerify AI")
     except Exception as e:
@@ -62,7 +65,14 @@ except Exception as e:
     templates = None
 
 # Serve static files from frontend directory
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+if os.path.exists(frontend_dir):
+    try:
+        app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
+    except Exception as e:
+        print(f"Warning: Could not mount static files from {frontend_dir}: {e}")
+else:
+    print(f"Warning: Frontend directory not found at {frontend_dir}")
 
 
 # Rate limiting middleware
