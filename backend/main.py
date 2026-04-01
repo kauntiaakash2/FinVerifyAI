@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from datetime import datetime
 import time
+import os
 from typing import Dict
 
 from .config import settings
@@ -24,9 +25,15 @@ request_counts: Dict[str, list] = {}
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan events for startup/shutdown."""
-    logger.info(f"Starting FinVerify AI in {settings.ENVIRONMENT} mode")
+    try:
+        logger.info(f"Starting FinVerify AI in {settings.ENVIRONMENT} mode")
+    except Exception as e:
+        print(f"Error logging startup: {e}")
     yield
-    logger.info("Shutting down FinVerify AI")
+    try:
+        logger.info("Shutting down FinVerify AI")
+    except Exception as e:
+        print(f"Error logging shutdown: {e}")
 
 
 # Initialize FastAPI
@@ -46,8 +53,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Templates
-templates = Jinja2Templates(directory="frontend")
+# Templates - Use absolute path for Vercel compatibility
+template_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+try:
+    templates = Jinja2Templates(directory=template_dir)
+except Exception as e:
+    print(f"Warning: Could not load templates from {template_dir}: {e}")
+    templates = None
 
 # Serve static files from frontend directory
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
@@ -87,9 +99,28 @@ async def rate_limit_middleware(request: Request, call_next):
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     """Serve the main HTML interface."""
-    return templates.TemplateResponse(
-        "index.html", {"request": request, "title": settings.API_TITLE}
-    )
+    if templates:
+        return templates.TemplateResponse(
+            "index.html", {"request": request, "title": settings.API_TITLE}
+        )
+    else:
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>FinVerify AI</title>
+        </head>
+        <body>
+            <h1>FinVerify AI - API Server</h1>
+            <p>Welcome to FinVerify AI. Use the API endpoints:</p>
+            <ul>
+                <li><a href="/docs">/docs - API documentation</a></li>
+                <li><a href="/api/health">/api/health - Health check</a></li>
+                <li><post>/api/verify - Verify financial claims</post></li>
+            </ul>
+        </body>
+        </html>
+        """
 
 
 @app.get("/api/health", response_model=HealthCheck)

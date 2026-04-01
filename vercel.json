@@ -1,6 +1,14 @@
 {
   "buildCommand": "pip install -r requirements.txt",
   "framework": "fastapi",
+  "env": {
+    "ENVIRONMENT": "production",
+    "DEBUG": "False",
+    "LOG_LEVEL": "INFO",
+    "CACHE_TTL": "300",
+    "RATE_LIMIT_PER_MINUTE": "10",
+    "PRIMARY_DATA_SOURCE": "yfinance"
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
