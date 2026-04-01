@@ -1,0 +1,50 @@
+# Version control
+.git
+.gitignore
+
+# Development
+venv/
+env/
+.venv
+*.pyc
+__pycache__
+.pytest_cache
+.tox
+.coverage
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs (not needed in production)
+logs/
+*.log
+
+# Test files
+tests/
+test_*.py
+*_test.py
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# Development tools
+.env.example
+.env.local
+setup.py
+setup.cfg
+tox.ini
+
+# Node modules (if any)
+node_modules/
+package-lock.json
+yarn.lock
